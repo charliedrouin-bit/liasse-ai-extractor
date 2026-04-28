@@ -3,82 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liasse-to-Excel AI | SFM Conseil</title>
+    <meta name="description" content="LiasseAI — Outil d'extraction intelligente de bilans financiers PDF vers Excel, propulsé par Google Gemini.">
+    <title>LiasseAI | Extraction Financière Intelligente</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <!-- Animated Background -->
     <div class="background-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
     <main class="container">
-        <header>
+        <!-- Header -->
+        <header id="app-header">
             <div class="logo">
-                <i data-lucide="component" class="logo-icon"></i>
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="scan-line" class="logo-icon"></i>
+                </div>
                 <h1>Liasse<span>AI</span></h1>
             </div>
             <p class="subtitle">Extraction intelligente de bilans financiers vers Excel</p>
+            <div class="badge-row">
+                <span class="badge"><i data-lucide="cpu"></i> Gemini AI</span>
+                <span class="badge"><i data-lucide="shield-check"></i> 100% Client-Side</span>
+                <span class="badge"><i data-lucide="globe"></i> FR & MA</span>
+            </div>
         </header>
 
-        <section class="config-card glass">
-            <div class="card-header">
-                <i data-lucide="key" class="icon-small"></i>
-                <h2>Configuration</h2>
+        <!-- Step 1: API Key -->
+        <section class="step-card glass" id="step-config">
+            <div class="step-indicator">
+                <span class="step-number">1</span>
+                <div class="step-info">
+                    <h2>Configuration</h2>
+                    <p class="step-desc">Entrez votre clé API Google Gemini</p>
+                </div>
             </div>
             <div class="input-group">
-                <label for="api-key">Clé API Gemini</label>
                 <div class="password-wrapper">
-                    <input type="password" id="api-key" placeholder="Entrez votre clé API Google Gemini...">
-                    <button id="toggle-key" class="btn-icon"><i data-lucide="eye"></i></button>
+                    <input type="password" id="api-key" placeholder="AIzaSy... (votre clé API Gemini)">
+                    <button id="toggle-key" class="btn-icon" aria-label="Afficher/masquer la clé">
+                        <i data-lucide="eye"></i>
+                    </button>
                 </div>
-                <p class="helper-text">Votre clé est stockée localement dans votre navigateur.</p>
+                <p class="helper-text">
+                    <i data-lucide="lock" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i>
+                    Stockée uniquement dans votre navigateur — jamais transmise à un serveur tiers.
+                </p>
             </div>
         </section>
 
-        <section class="upload-card glass" id="drop-zone">
-            <input type="file" id="file-input" accept="application/pdf" hidden>
-            <div class="upload-content">
-                <div class="icon-circle">
-                    <i data-lucide="file-up" class="upload-icon"></i>
+        <!-- Step 2: File Upload -->
+        <section class="step-card glass" id="step-upload">
+            <div class="step-indicator">
+                <span class="step-number">2</span>
+                <div class="step-info">
+                    <h2>Document</h2>
+                    <p class="step-desc">Déposez votre liasse fiscale au format PDF</p>
                 </div>
-                <h3>Déposez votre bilan (PDF)</h3>
-                <p>ou cliquez pour parcourir vos fichiers</p>
+            </div>
+            <div class="drop-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="application/pdf" hidden>
+                <div class="drop-zone-content">
+                    <div class="icon-circle">
+                        <i data-lucide="file-up" class="upload-icon"></i>
+                    </div>
+                    <p class="drop-zone-text">Glissez-déposez votre PDF ici</p>
+                    <p class="drop-zone-hint">ou cliquez pour parcourir</p>
+                </div>
                 <div id="file-info" class="file-info hidden">
-                    <i data-lucide="file-text"></i>
+                    <i data-lucide="file-check" style="width:18px;height:18px;"></i>
                     <span id="file-name">Aucun fichier</span>
+                    <span id="file-size" class="file-size"></span>
+                    <button id="remove-file" class="btn-icon-small" aria-label="Retirer le fichier">
+                        <i data-lucide="x" style="width:14px;height:14px;"></i>
+                    </button>
                 </div>
             </div>
         </section>
 
+        <!-- Step 3: Extract Button -->
         <section class="actions">
             <button id="extract-btn" class="btn-primary" disabled>
-                <i data-lucide="zap"></i>
-                <span>Extraire les données</span>
+                <i data-lucide="sparkles"></i>
+                <span>Analyser avec Gemini AI</span>
             </button>
         </section>
 
-        <section id="status-area" class="status-area hidden">
-            <div class="loader-wrapper">
+        <!-- Processing Logs -->
+        <section id="log-area" class="log-area hidden">
+            <div class="log-header">
                 <div class="loader"></div>
-                <p id="status-text">Analyse du document en cours...</p>
+                <h3 id="log-title">Analyse en cours...</h3>
             </div>
+            <div id="log-entries" class="log-entries"></div>
         </section>
 
-        <section id="result-area" class="result-card glass hidden">
-            <div class="success-header">
-                <i data-lucide="check-circle" class="icon-success"></i>
-                <h3>Analyse terminée !</h3>
+        <!-- Error Display -->
+        <section id="error-area" class="error-area glass hidden">
+            <div class="error-header">
+                <i data-lucide="alert-triangle" class="icon-error"></i>
+                <h3>Erreur</h3>
             </div>
-            <p>Les données ont été extraites avec succès au format financier.</p>
-            <button id="download-btn" class="btn-secondary">
-                <i data-lucide="download"></i>
-                Télécharger le fichier Excel (.xlsx)
+            <p id="error-message" class="error-message"></p>
+            <button id="retry-btn" class="btn-outline">
+                <i data-lucide="refresh-cw"></i> Réessayer
             </button>
+        </section>
+
+        <!-- Preview & Edit Data -->
+        <section id="preview-area" class="preview-area hidden">
+            <!-- Tab Navigation -->
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="bilan">
+                    <i data-lucide="scale"></i> Bilan
+                </button>
+                <button class="tab-btn" data-tab="resultat">
+                    <i data-lucide="trending-up"></i> Compte de Résultat
+                </button>
+                <button class="tab-btn" data-tab="kpis">
+                    <i data-lucide="gauge"></i> KPIs
+                </button>
+            </div>
+
+            <!-- Tab Content: Bilan -->
+            <div class="tab-content active" id="tab-bilan">
+                <div class="table-section">
+                    <h4><i data-lucide="arrow-up-right"></i> Actif</h4>
+                    <div class="table-wrapper">
+                        <table id="table-actif">
+                            <thead>
+                                <tr>
+                                    <th>Rubrique</th>
+                                    <th>Net N</th>
+                                    <th>Net N-1</th>
+                                    <th>Variation</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="table-section">
+                    <h4><i data-lucide="arrow-down-right"></i> Passif</h4>
+                    <div class="table-wrapper">
+                        <table id="table-passif">
+                            <thead>
+                                <tr>
+                                    <th>Rubrique</th>
+                                    <th>Net N</th>
+                                    <th>Net N-1</th>
+                                    <th>Variation</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="balance-check" class="balance-check"></div>
+            </div>
+
+            <!-- Tab Content: Compte de Résultat -->
+            <div class="tab-content" id="tab-resultat">
+                <div class="table-section">
+                    <h4><i data-lucide="receipt"></i> Compte de Résultat</h4>
+                    <div class="table-wrapper">
+                        <table id="table-resultat">
+                            <thead>
+                                <tr>
+                                    <th>Rubrique</th>
+                                    <th>Montant N</th>
+                                    <th>Montant N-1</th>
+                                    <th>Variation</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: KPIs -->
+            <div class="tab-content" id="tab-kpis">
+                <div class="kpi-grid" id="kpi-grid"></div>
+            </div>
+
+            <!-- Download Actions -->
+            <div class="download-actions">
+                <button id="download-btn" class="btn-success">
+                    <i data-lucide="download"></i>
+                    Télécharger l'Excel complet (.xlsx)
+                </button>
+                <button id="new-extract-btn" class="btn-outline">
+                    <i data-lucide="plus"></i>
+                    Nouvelle extraction
+                </button>
+            </div>
         </section>
     </main>
 
