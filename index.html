@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liasse-to-Excel AI | SFM Conseil</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="container">
+        <header>
+            <div class="logo">
+                <i data-lucide="component" class="logo-icon"></i>
+                <h1>Liasse<span>AI</span></h1>
+            </div>
+            <p class="subtitle">Extraction intelligente de bilans financiers vers Excel</p>
+        </header>
+
+        <section class="config-card glass">
+            <div class="card-header">
+                <i data-lucide="key" class="icon-small"></i>
+                <h2>Configuration</h2>
+            </div>
+            <div class="input-group">
+                <label for="api-key">Clé API Gemini</label>
+                <div class="password-wrapper">
+                    <input type="password" id="api-key" placeholder="Entrez votre clé API Google Gemini...">
+                    <button id="toggle-key" class="btn-icon"><i data-lucide="eye"></i></button>
+                </div>
+                <p class="helper-text">Votre clé est stockée localement dans votre navigateur.</p>
+            </div>
+        </section>
+
+        <section class="upload-card glass" id="drop-zone">
+            <input type="file" id="file-input" accept="application/pdf" hidden>
+            <div class="upload-content">
+                <div class="icon-circle">
+                    <i data-lucide="file-up" class="upload-icon"></i>
+                </div>
+                <h3>Déposez votre bilan (PDF)</h3>
+                <p>ou cliquez pour parcourir vos fichiers</p>
+                <div id="file-info" class="file-info hidden">
+                    <i data-lucide="file-text"></i>
+                    <span id="file-name">Aucun fichier</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="actions">
+            <button id="extract-btn" class="btn-primary" disabled>
+                <i data-lucide="zap"></i>
+                <span>Extraire les données</span>
+            </button>
+        </section>
+
+        <section id="status-area" class="status-area hidden">
+            <div class="loader-wrapper">
+                <div class="loader"></div>
+                <p id="status-text">Analyse du document en cours...</p>
+            </div>
+        </section>
+
+        <section id="result-area" class="result-card glass hidden">
+            <div class="success-header">
+                <i data-lucide="check-circle" class="icon-success"></i>
+                <h3>Analyse terminée !</h3>
+            </div>
+            <p>Les données ont été extraites avec succès au format financier.</p>
+            <button id="download-btn" class="btn-secondary">
+                <i data-lucide="download"></i>
+                Télécharger le fichier Excel (.xlsx)
+            </button>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+    </script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
