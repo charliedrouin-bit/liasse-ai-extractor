@@ -106,7 +106,7 @@ elements.extractBtn.addEventListener('click', async () => {
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
             Tu es un expert comptable spécialisé dans l'analyse de liasses fiscales.
