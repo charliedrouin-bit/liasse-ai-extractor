@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="LiasseAI — Outil d'extraction intelligente de bilans financiers PDF vers Excel, propulsé par Google Gemini.">
-    <title>LiasseAI | Extraction Financière Intelligente</title>
+    <meta name="description" content="LiasseAI — Extraction intelligente de liasses fiscales PDF vers Excel via Google Gemini AI. 100% client-side.">
+    <title>LiasseAI | Liasse Fiscale → Excel</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PDF.js for pre-processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
-    <!-- Animated Background -->
     <div class="background-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -28,11 +29,11 @@
                 </div>
                 <h1>Liasse<span>AI</span></h1>
             </div>
-            <p class="subtitle">Extraction intelligente de bilans financiers vers Excel</p>
+            <p class="subtitle">Extraction intelligente de liasses fiscales vers Excel</p>
             <div class="badge-row">
-                <span class="badge"><i data-lucide="cpu"></i> Gemini AI</span>
+                <span class="badge"><i data-lucide="cpu"></i> Gemini 2.0 Flash</span>
                 <span class="badge"><i data-lucide="shield-check"></i> 100% Client-Side</span>
-                <span class="badge"><i data-lucide="globe"></i> FR & MA</span>
+                <span class="badge"><i data-lucide="scan-search"></i> Pré-traitement PDF.js</span>
             </div>
         </header>
 
@@ -41,20 +42,20 @@
             <div class="step-indicator">
                 <span class="step-number">1</span>
                 <div class="step-info">
-                    <h2>Configuration</h2>
-                    <p class="step-desc">Entrez votre clé API Google Gemini</p>
+                    <h2>Clé API Gemini</h2>
+                    <p class="step-desc">Obtenez-la gratuitement sur <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com</a></p>
                 </div>
             </div>
             <div class="input-group">
                 <div class="password-wrapper">
-                    <input type="password" id="api-key" placeholder="AIzaSy... (votre clé API Gemini)">
+                    <input type="password" id="api-key" placeholder="AIzaSy...">
                     <button id="toggle-key" class="btn-icon" aria-label="Afficher/masquer la clé">
                         <i data-lucide="eye"></i>
                     </button>
                 </div>
                 <p class="helper-text">
                     <i data-lucide="lock" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i>
-                    Stockée uniquement dans votre navigateur — jamais transmise à un serveur tiers.
+                    Stockée uniquement dans votre navigateur. Jamais envoyée sur nos serveurs.
                 </p>
             </div>
         </section>
@@ -64,8 +65,8 @@
             <div class="step-indicator">
                 <span class="step-number">2</span>
                 <div class="step-info">
-                    <h2>Document</h2>
-                    <p class="step-desc">Déposez votre liasse fiscale au format PDF</p>
+                    <h2>Document PDF</h2>
+                    <p class="step-desc">Liasse fiscale, bilan, compte de résultat</p>
                 </div>
             </div>
             <div class="drop-zone" id="drop-zone">
@@ -78,9 +79,11 @@
                     <p class="drop-zone-hint">ou cliquez pour parcourir</p>
                 </div>
                 <div id="file-info" class="file-info hidden">
-                    <i data-lucide="file-check" style="width:18px;height:18px;"></i>
-                    <span id="file-name">Aucun fichier</span>
-                    <span id="file-size" class="file-size"></span>
+                    <i data-lucide="file-check" style="width:18px;height:18px;flex-shrink:0;"></i>
+                    <div class="file-details">
+                        <span id="file-name">—</span>
+                        <span id="file-meta" class="file-meta"></span>
+                    </div>
                     <button id="remove-file" class="btn-icon-small" aria-label="Retirer le fichier">
                         <i data-lucide="x" style="width:14px;height:14px;"></i>
                     </button>
@@ -88,21 +91,22 @@
             </div>
         </section>
 
-        <!-- Step 3: Extract Button -->
+        <!-- Extract Button -->
         <section class="actions">
             <button id="extract-btn" class="btn-primary" disabled>
                 <i data-lucide="sparkles"></i>
-                <span>Analyser avec Gemini AI</span>
+                <span>Analyser et Extraire</span>
             </button>
         </section>
 
-        <!-- Processing Logs -->
-        <section id="log-area" class="log-area hidden">
-            <div class="log-header">
+        <!-- Processing Pipeline -->
+        <section id="pipeline-area" class="pipeline-area hidden">
+            <div class="pipeline-header">
                 <div class="loader"></div>
-                <h3 id="log-title">Analyse en cours...</h3>
+                <h3 id="pipeline-title">Pipeline de traitement</h3>
             </div>
-            <div id="log-entries" class="log-entries"></div>
+            <div id="pipeline-steps" class="pipeline-steps"></div>
+            <div id="pipeline-detail" class="pipeline-detail"></div>
         </section>
 
         <!-- Error Display -->
@@ -117,35 +121,35 @@
             </button>
         </section>
 
-        <!-- Preview & Edit Data -->
+        <!-- Data Preview -->
         <section id="preview-area" class="preview-area hidden">
+            <div class="preview-header">
+                <h3><i data-lucide="check-circle" style="color:var(--success);"></i> Extraction réussie</h3>
+                <p id="preview-meta" class="preview-meta"></p>
+            </div>
+
             <!-- Tab Navigation -->
             <div class="tab-bar">
                 <button class="tab-btn active" data-tab="bilan">
                     <i data-lucide="scale"></i> Bilan
                 </button>
                 <button class="tab-btn" data-tab="resultat">
-                    <i data-lucide="trending-up"></i> Compte de Résultat
+                    <i data-lucide="trending-up"></i> CdR
                 </button>
                 <button class="tab-btn" data-tab="kpis">
                     <i data-lucide="gauge"></i> KPIs
                 </button>
             </div>
 
-            <!-- Tab Content: Bilan -->
+            <!-- Tab: Bilan -->
             <div class="tab-content active" id="tab-bilan">
                 <div class="table-section">
                     <h4><i data-lucide="arrow-up-right"></i> Actif</h4>
                     <div class="table-wrapper">
                         <table id="table-actif">
-                            <thead>
-                                <tr>
-                                    <th>Rubrique</th>
-                                    <th>Net N</th>
-                                    <th>Net N-1</th>
-                                    <th>Variation</th>
-                                </tr>
-                            </thead>
+                            <thead><tr>
+                                <th>Rubrique</th><th>Brut</th><th>Amort.</th><th>Net N</th><th>Net N-1</th><th>Var.</th>
+                            </tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -154,14 +158,9 @@
                     <h4><i data-lucide="arrow-down-right"></i> Passif</h4>
                     <div class="table-wrapper">
                         <table id="table-passif">
-                            <thead>
-                                <tr>
-                                    <th>Rubrique</th>
-                                    <th>Net N</th>
-                                    <th>Net N-1</th>
-                                    <th>Variation</th>
-                                </tr>
-                            </thead>
+                            <thead><tr>
+                                <th>Rubrique</th><th>Net N</th><th>Net N-1</th><th>Var.</th>
+                            </tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -169,36 +168,31 @@
                 <div id="balance-check" class="balance-check"></div>
             </div>
 
-            <!-- Tab Content: Compte de Résultat -->
+            <!-- Tab: CdR -->
             <div class="tab-content" id="tab-resultat">
                 <div class="table-section">
                     <h4><i data-lucide="receipt"></i> Compte de Résultat</h4>
                     <div class="table-wrapper">
                         <table id="table-resultat">
-                            <thead>
-                                <tr>
-                                    <th>Rubrique</th>
-                                    <th>Montant N</th>
-                                    <th>Montant N-1</th>
-                                    <th>Variation</th>
-                                </tr>
-                            </thead>
+                            <thead><tr>
+                                <th>Rubrique</th><th>Montant N</th><th>Montant N-1</th><th>Var.</th>
+                            </tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab Content: KPIs -->
+            <!-- Tab: KPIs -->
             <div class="tab-content" id="tab-kpis">
                 <div class="kpi-grid" id="kpi-grid"></div>
             </div>
 
-            <!-- Download Actions -->
+            <!-- Download -->
             <div class="download-actions">
                 <button id="download-btn" class="btn-success">
                     <i data-lucide="download"></i>
-                    Télécharger l'Excel complet (.xlsx)
+                    Générer le fichier Excel (.xlsx)
                 </button>
                 <button id="new-extract-btn" class="btn-outline">
                     <i data-lucide="plus"></i>
