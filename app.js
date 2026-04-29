@@ -37,6 +37,7 @@ const el = {
     tableResultat: document.querySelector('#table-resultat tbody'),
     kpiGrid: document.getElementById('kpi-grid'),
     balanceCheck: document.getElementById('balance-check'),
+    modelSelect: document.getElementById('model-select'),
 };
 
 // ============================================
@@ -275,11 +276,12 @@ async function runExtraction() {
         // Phase 2: Send to Gemini
         setStep('ai-send', 'active');
         const t3 = performance.now();
-        logDetail('Connexion à Gemini 2.0 Flash...');
+        const selectedModel = el.modelSelect.value;
+        logDetail(`Connexion à ${selectedModel}...`);
 
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: selectedModel,
             generationConfig: { responseMimeType: "application/json", temperature: 0.05 }
         });
 
